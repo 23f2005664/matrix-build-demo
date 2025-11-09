@@ -6,22 +6,33 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest  # Consistent shell (Bash) for all jobs
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]  # 3 variants: parallel OS builds
+        node-version: [14, 16, 18]  # 3 variants: parallel Node builds
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
       - name: matrix-f42d0fc  # Required identifier step
-        run: echo "Building for OS ${{ matrix.os }}"
+        run: echo "Building for Node version ${{ matrix.node-version }}"
+
+      - name: Install dependencies  # Simulates build; creates package.json
+        run: npm init -y
 
       - name: Generate build artifact
-        run: echo "Build output for $$ {{ matrix.os }}" > build-output- $${{ matrix.os }}.txt
+        run: echo "Build output for Node ${{ matrix.node-version }}" > build-output-${{ matrix.node-version }}.txt
+
+      - name: Verify file created  # Debug step: Lists files (remove after success)
+        run: ls -la build-output-*.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: build-f42d0fc-${{ matrix.os }}  # Prefix: build-f42d0fc-ubuntu-latest, etc.
-          path: build-output-${{ matrix.os }}.txt
+          name: build-f42d0fc-v${{ matrix.node-version }}  # Prefix: build-f42d0fc-v14, etc.
+          path: build-output-${{ matrix.node-version }}.txt
